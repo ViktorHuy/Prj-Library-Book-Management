@@ -1,26 +1,134 @@
 package Controller;
 
-import model.data.*;
+import Model.data.*;
+import java.nio.file.*;
+import java.io.IOException;
 import Utils.InputValidation;
 import java.time.LocalDate;
+import java.util.*;
 
 public class BookManager {
+    public static final  Path FILE_PATH = Paths.get("book.txt");
+    
+    // HashMap helper
+private static Map<String, BookData> loadBooksToMap() {
+        Map<String, BookData> bookMap = new LinkedHashMap<>();
 
+        if (!Files.exists(FILE_PATH)) {
+            return bookMap;
+        }
+
+        try {
+            List<String> lines = Files.readAllLines(FILE_PATH);
+            for (String line : lines) {
+                if (line.trim().isEmpty()) continue;
+                BookData book = BookData.fromTxtLine(line);
+                bookMap.put(book.getId().toString(), book);
+            }
+        } catch (IOException e) {
+            System.err.println("Error reading books.txt: " + e.getMessage());
+        }
+
+        return bookMap;
+    }
+
+    private static void saveMapToFile(Map<String, BookData> bookMap) {
+        List<String> lines = new ArrayList<>();
+        for (BookData b : bookMap.values()) {
+            lines.add(b.toTxtLine());
+        }
+
+        try {
+            Files.write(FILE_PATH, lines);
+        } catch (IOException e) {
+            System.err.println("Error writing to books.txt: " + e.getMessage());
+        }
+    }
+
+    // CRUD functions
     public static void bookInput() {
         String title = InputValidation.getValidString("[title]:", "Title cannot be blank!");
         String author = InputValidation.getValidString("[Author]:", "Author field cannot be blank!");
-        LocalDate pubDate = InputValidation.getValidDate("[Publish Date]:", "Please ensure the input is strictly [DD-MM-YYYY]");
-        Double price = InputValidation.getValidPrice();
         String category = InputValidation.getValidString("[Category]:", "field cannot be empty");
         String genre = InputValidation.getValidString("[Genre/Subject]:", "Field cannot be blank!");
+        Double price = InputValidation.getValidPrice();
+        LocalDate pubDate = InputValidation.getValidDate("[Publish Date]:", "Please ensure the input is strictly [DD-MM-YYYY]");
+    
+    BookData newBook = new BookData(title, author,genre, category, price, pubDate);
+
+        Map<String, BookData> map = loadBooksToMap();
+        map.put(newBook.getId().toString(), newBook);
+        saveMapToFile(map);
+
+        System.out.println("Success! Book saved with ID: " + newBook.getId());
     }
     
-    public static void magazineInput(){
-        String magTitle = InputValidation.getValidString("[title]:", "Title cannot be blank!");
-        String publisher = InputValidation.getValidString("[Publisher]:", "publisher field cannot be blank!");
-        LocalDate pubDate = InputValidation.getValidDate("[Publish Date]:", "Please ensure the input is strictly [DD-MM-YYYY]");
-        Double price = InputValidation.getValidPrice();
-        int issue = InputValidation.getValidIssue();
-        String type = InputValidation.getValidString("[Genre]:", "Field cannot be blank!");
+    public static void displayAllBooks() {
+        Map<String, BookData> map = loadBooksToMap();
+        if (map.isEmpty()) {
+            System.out.println("\nNo books found in the library.");
+            return;
+        }
+
+        System.out.println("\n--- LIBRARY INVENTORY ---");
+        for (BookData b : map.values()) {
+            System.out.println(b);
+        }
+    }
+    
+    public static void searchBookByTitle(String keyword) {
+        Map<String, BookData> map = loadBooksToMap();
+        boolean found = false;
+
+        System.out.println("\n--- SEARCH RESULTS ---");
+        for (BookData b : map.values()) {
+            if (b.getTitle().toLowerCase().contains(keyword.toLowerCase())) {
+                System.out.println(b);
+                found = true;
+            }
+        }
+
+        if (!found) {
+            System.out.println("No books found matching title: " + keyword);
+        }
+    }
+    public static void updateBook(String targetId) {
+        Map<String, BookData> map = loadBooksToMap();
+
+        if (!map.containsKey(targetId)) {
+            System.out.println("Error: Book ID not found.");
+            return;
+        }
+
+        System.out.println("\nBook found! Enter new details:");
+        String newTitle = InputValidation.getValidString("[New Title]:", "Title cannot be blank!");
+        String newAuthor = InputValidation.getValidString("[New Author]:", "Author field cannot be blank!");
+        String newGenre = InputValidation.getValidString("[New Genre/Subject]:", "Field cannot be blank!");
+        LocalDate newPubDate = InputValidation.getValidDate("[New Publish Date]:", "Please ensure the input is strictly [DD-MM-YYYY]");
+        Double newPrice = InputValidation.getValidPrice();
+        String newCategory = InputValidation.getValidString("[New Category]:", "Field cannot be empty");
+
+        // Keep the existing ID
+        UUID existingId = UUID.fromString(targetId);
+        BookData updatedBook = new BookData(existingId, newTitle, newAuthor, newGenre,  newCategory, newPrice, newPubDate);
+
+        map.put(targetId, updatedBook);
+        saveMapToFile(map);
+
+        System.out.println("Book updated successfully.");
+    }
+
+
+    public static void removeBook(String targetId) {
+        Map<String, BookData> map = loadBooksToMap();
+
+        BookData removed = map.remove(targetId);
+
+        if (removed != null) {
+            saveMapToFile(map);
+            System.out.println("Book '" + removed.getTitle() + "' removed successfully.");
+        } else {
+            System.out.println("Error: Book ID not found.");
+        }
     }
 }
