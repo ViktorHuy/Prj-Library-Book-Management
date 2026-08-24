@@ -3,7 +3,7 @@ package Controller;
 import java.nio.file.*;
 import java.io.IOException;
 import Model.customer.Customer;
-import Utils.InputValidation;
+import Utils.Validation;
 import java.util.*;
 
 public class CustomerManager {
@@ -46,11 +46,11 @@ public class CustomerManager {
 
     /* CRUDs Functions*/
     public static void inputCustomer() {
-    System.out.println("\n--- ADD NEW CUSTOMER ---");
-        String name = InputValidation.getValidString("[Customer's Name]:", "This field cannot be empty");
-        String phoneNum = InputValidation.getValidPhone();
-        String mail = InputValidation.getValidMail();
-        boolean isMem = InputValidation.getMemberStatus();
+    System.out.println("\n--- Please Input Customer Info ---");
+        String name = Validation.getValidString("[Customer's Name]:", "This field cannot be empty");
+        String phoneNum = Validation.getValidPhone();
+        String mail = Validation.getValidMail();
+        boolean isMem = Validation.getMemberStatus();
 
         Customer newCustomer = new Customer(name, phoneNum, mail, isMem);
 
@@ -100,10 +100,10 @@ public class CustomerManager {
         }
 
         System.out.printf("\nCustomer found! Enter new details:");
-        String newName = InputValidation.getValidString("[New Name]:", "This field cannot be empty");
-        String newPhone = InputValidation.getValidPhone();
-        String newMail = InputValidation.getValidMail();
-        boolean newIsMem = InputValidation.getMemberStatus();
+        String newName = Validation.getValidString("[New Name]:", "This field cannot be empty");
+        String newPhone = Validation.getValidPhone();
+        String newMail = Validation.getValidMail();
+        boolean newIsMem = Validation.getMemberStatus();
 
         UUID existingId = UUID.fromString(targetId);
         Customer updatedCustomer = new Customer(existingId, newName, newPhone, newMail, newIsMem);
@@ -126,4 +126,18 @@ public class CustomerManager {
             System.out.println("Error: Customer ID not found.");
         }
     }
+    
+    // helper function to let reservation know if the customer is a member or not
+    public static boolean isCustomerMember(String customerId) {
+    Map<String, Customer> map = loadCustomersToMap();
+    Customer c = map.get(customerId);
+    
+    // returns true if the customer exists AND is a member
+    return c != null && c.isMember(); 
+}
+    // helper function for validation
+    public static boolean customerExists(String customerId) {
+    Map<String, Customer> map = loadCustomersToMap();
+    return map.containsKey(customerId);
+}
 }

@@ -7,8 +7,11 @@ import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.Map;
+import Model.Reservations;
+import Controller.*;
 
-public class InputValidation {
+public class Validation {
 
     private static final Scanner sc = new Scanner(System.in);
     public static final DateTimeFormatter DATE_FORMAT = DateTimeFormatter.ofPattern("dd-MM-yyyy");
@@ -134,5 +137,37 @@ public class InputValidation {
             }
         }
     }
+ 
+    public static boolean isValidRequest(String customerId, String bookId, Map<String, Reservations> reservationMap) {
+        
+        // check if the customer ID exists in CustomerManager
+        if (!CustomerManager.customerExists(customerId)) {
+            System.out.println("Error: Customer ID does not exist in system.");
+            return false;
+        }
 
+        // check if the book ID exists in BookManager
+        if (!BookManager.bookExists(bookId)) {
+            System.out.println("Error: Book ID does not exist in inventory.");
+            return false;
+        }
+
+        // prevention for booking the same book from same customer
+        for (Reservations res : reservationMap.values()) {
+            if (res.getBookId().toString().equals(bookId) && 
+                res.getCustomerId().toString().equals(customerId)) {
+
+                if ("BORROWED".equals(res.getStatus())) {
+                    System.out.println("Error: Customer currently holds a borrowed copy of this book.");
+                    return false;
+                }
+                if ("WAITING".equals(res.getStatus())) {
+                    System.out.println("Error: Customer is already on the waitlist for this book.");
+                    return false;
+                }
+            }
+        }
+
+        return true; // All validation checks passed!
+    }
 }

@@ -39,6 +39,13 @@ public class Customer {
 
         return new Customer(loadedId, name, phoneNum, mail, isMember);
     }
+    
+    public boolean isMember(){
+        if(this.isMember = true){
+            return true;
+        }
+        return false;
+    }
 
     public UUID getId() { return id; }
 
