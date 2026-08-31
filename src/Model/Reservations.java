@@ -9,6 +9,7 @@ public class Reservations {
     private UUID bookId;
     private LocalDate borrowDate;
     private String status;
+    private LocalDate returnDate;
 
     public Reservations(UUID customerId, UUID bookId, String status) {
         this.reserveId = UUID.randomUUID();
@@ -16,14 +17,16 @@ public class Reservations {
         this.bookId = bookId;
         this.borrowDate = LocalDate.now();
         this.status = status;
+        this.returnDate = null;
     }
 
-    public Reservations(UUID reserveId, UUID customerId, UUID bookId, LocalDate borrowDate, String status) {
+    public Reservations(UUID reserveId, UUID customerId, UUID bookId, LocalDate borrowDate, String status, LocalDate returnDate) {
         this.reserveId = reserveId;
         this.customerId = customerId;
         this.bookId = bookId;
         this.borrowDate = borrowDate;
         this.status = status;
+        this.returnDate = returnDate;
     }
 
     public UUID getReserveId() {
@@ -66,6 +69,15 @@ public class Reservations {
     public void setStatus(String status) {
         this.status = status;
     }
+
+    public LocalDate getReturnDate() {
+        return returnDate;
+    }
+
+    public void setReturnDate(LocalDate returnDate) {
+        this.returnDate = returnDate;
+    }
+    
     
     public String toTxtLine() {
         return reserveId.toString() + "|" + customerId.toString() + "|" + bookId.toString() + "|" + 
@@ -74,12 +86,17 @@ public class Reservations {
 
     public static Reservations fromTxtLine(String line) {
         String[] parts = line.split("\\|");
+        LocalDate parsedReturn = null;
+        if (parts.length == 6 && !parts[5].equals("null")) {
+            parsedReturn = LocalDate.parse(parts[5]);
+        }
         return new Reservations(
             UUID.fromString(parts[0]), 
             UUID.fromString(parts[1]), 
             UUID.fromString(parts[2]), 
             LocalDate.parse(parts[3]), 
-            parts[4] // status
+            parts[4], // status
+            parsedReturn
         );
     }
     

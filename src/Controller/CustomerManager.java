@@ -135,9 +135,17 @@ public class CustomerManager {
     // returns true if the customer exists AND is a member
     return c != null && c.isMember(); 
 }
-    // helper function for validation
+    // helper functions 
     public static boolean customerExists(String customerId) {
     Map<String, Customer> map = loadCustomersToMap();
     return map.containsKey(customerId);
+}
+    
+    public static String getCustomerName(String customerId) {
+    Map<String, Customer> map = loadCustomersToMap();
+    Customer c = map.get(customerId);
+    
+    // Returns the name, or a fallback if the customer was deleted from the system
+    return (c != null) ? c.getName() : "Unknown Customer (Deleted)";
 }
 }

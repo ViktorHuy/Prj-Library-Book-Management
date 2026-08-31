@@ -135,5 +135,12 @@ private static Map<String, BookData> loadBooksToMap() {
     public static boolean bookExists(String bookId) {
     Map<String, BookData> map = loadBooksToMap();
     return map.containsKey(bookId);
+    }
+    
+    public static String getBookTitle(String bookId) {
+    Map<String, BookData> map = loadBooksToMap();
+    BookData book = map.get(bookId);
+    return (book != null) ? book.getTitle() : "Unknown Book (Deleted)";
 }
 }
+
