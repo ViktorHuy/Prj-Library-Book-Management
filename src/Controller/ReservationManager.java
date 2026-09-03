@@ -84,11 +84,19 @@ public class ReservationManager {
     // Find the person who currently have the book and mark the borrow status as COMPLETED
     for (Reservations res : map.values()) {
         if (res.getBookId().toString().equals(bookId) && res.getStatus().equals("BORROWED")) {
-            res.setStatus("COMPLETED");
-            res.setReturnDate(LocalDate.now());
-            bookReturned = true;
-            System.out.println("Book successfully returned!");
-            break;
+            long daysBorrowed = ChronoUnit.DAYS.between(res.getBorrowDate(), LocalDate.now());
+    int MAX_DAYS = 14;
+
+    if (daysBorrowed > MAX_DAYS) {
+        int daysOverdue = (int) (daysBorrowed - MAX_DAYS);
+        // Issue fine
+        OverdueManager.issueFine(res.getCustomerId().toString(), res.getReserveId().toString(), daysOverdue);
+    } else {
+        System.out.println("Book returned on time.");
+    }
+
+    bookReturned = true;
+    break;
         }
     }
 
@@ -132,6 +140,7 @@ public class ReservationManager {
 
     saveMapToFile(map);
 }
+    
     
     public static void viewCustomerHistory(String customerId) {
     if (!CustomerManager.customerExists(customerId)) {
@@ -226,14 +235,14 @@ public class ReservationManager {
                 earliestActivity = res.getBorrowDate();
             }
 
-            // Tally Completed returns
+            // Tally completed returns
             if (res.getStatus().equals("COMPLETED")) {
                 timesBorrowed++;
                 LocalDate end = (res.getReturnDate() != null) ? res.getReturnDate() : res.getBorrowDate();
                 totalDaysBorrowed += ChronoUnit.DAYS.between(res.getBorrowDate(), end);
             }
             
-            // Tally Currently Borrowed
+            // Tally currently borrowed book
             if (res.getStatus().equals("BORROWED")) {
                 timesBorrowed++;
                 totalDaysBorrowed += ChronoUnit.DAYS.between(res.getBorrowDate(), LocalDate.now());
@@ -241,7 +250,6 @@ public class ReservationManager {
         }
     }
 
-    // Math calculations
     long totalDaysSinceFirstRequest = ChronoUnit.DAYS.between(earliestActivity, LocalDate.now());
     
     // Prevent divide-by-zero if it was added today
