@@ -12,6 +12,7 @@ public class BookData {
     private String genre;
     private String category;
     private LocalDate publishDate;
+    private boolean isAvailable;
 
     public BookData(String title, String author, String genre, String category, double price, LocalDate publishDate) {
         this.id = UUID.randomUUID();
@@ -21,9 +22,10 @@ public class BookData {
         this.genre = genre;
         this.category = category;
         this.publishDate = publishDate;
+        this.isAvailable = true;
     }
 
-    public BookData(UUID id, String title, String author, String genre, String category,double price, LocalDate publishDate) {
+    public BookData(UUID id, String title, String author, String genre, String category,double price, LocalDate publishDate, boolean isAvailable) {
         this.id = id;
         this.title = title;
         this.author = author;
@@ -31,6 +33,7 @@ public class BookData {
         this.genre = genre;
         this.category = category;
         this.publishDate = publishDate;
+        this.isAvailable = isAvailable;
     }
 
     public String getGenre() {
@@ -91,14 +94,35 @@ public class BookData {
     public void setPublishDate(LocalDate publishDate) {
         this.publishDate = publishDate;
     }
+
+    public boolean getIsAvailable() {
+        return isAvailable;
+    }
+
+    public void setIsAvailable(boolean isAvailable) {
+        this.isAvailable = isAvailable;
+    }
+    
+    public boolean isAvailable(){
+        return isAvailable;
+    }
+    
+    
     // Object -> Text Line
     public String toTxtLine() {
-        return id.toString() + "|" + title + "|" + author + "|" + genre + "|" + publishDate.toString() + "|" + price + "|" + category;
+        return id.toString() + "|" + title + "|" + author + "|" + genre + "|" + publishDate.toString() + "|" + price + "|" + category + "|" + isAvailable;
     }
 
     // Convert Text Line -> Object
     public static BookData fromTxtLine(String line) {
         String[] parts = line.split("\\|");
+        
+        // new available status to enable/disable a book from being reserve
+        boolean availableStatus = true; 
+        if (parts.length >= 4) {
+            availableStatus = Boolean.parseBoolean(parts[3]); 
+        }
+        
         UUID loadedId = UUID.fromString(parts[0]);
         String title = parts[1];
         String author = parts[2];
@@ -107,6 +131,6 @@ public class BookData {
         Double price = Double.parseDouble(parts[5]);   
         LocalDate publishDate = LocalDate.parse(parts[6]);
 
-        return new BookData(loadedId, title, author, genre, category, price, publishDate);
+        return new BookData(loadedId, title, author, genre, category, price, publishDate,availableStatus);
     }
 }

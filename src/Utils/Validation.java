@@ -4,16 +4,16 @@ import java.util.InputMismatchException;
 import java.util.Scanner;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
-import java.time.format.DateTimeParseException;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.Map;
 import Model.Reservations;
 import Controller.*;
+import java.time.format.DateTimeParseException;
 
 public class Validation {
 
-    private static final Scanner sc = new Scanner(System.in);
+    public static final Scanner sc = new Scanner(System.in);
     public static final DateTimeFormatter DATE_FORMAT = DateTimeFormatter.ofPattern("dd-MM-yyyy");
     private static final String EMAIL_REGEX = "^[A-Za-z0-9_+&*-]+(?:\\.[A-Za-z0-9_+&*-]+)*@" + "(?:[A-Za-z0-9-]+\\.)+[a-zA-Z]{2,7}$";
     private static final Pattern EMAIL_PATTERN = Pattern.compile(EMAIL_REGEX);
@@ -31,25 +31,25 @@ public class Validation {
             try {
                 System.out.print("[Price]:");
                 double input = sc.nextDouble();
+                sc.nextLine();
                 if (input <= 0) {
                     System.out.println("Price cannot be 0$");
-                    continue;
+                    continue;      
                 }
-            } catch (InputMismatchException e) {
+                    return input;
+            } catch (NumberFormatException e) {
                 System.out.println("invalid pricing");
-                sc.nextLine();
             }
         }
     }
 
     public static int getValidIssue() {
-        while (true) {
+       while (true) {
+            System.out.print("[Issue No.]:");
             try {
-                System.out.print("[Issue No.]:");
-                return Integer.parseInt(sc.nextLine());
-            } catch (InputMismatchException e) {
-                System.out.println("invalid issue");
-                sc.nextLine();
+                return Integer.parseInt(sc.nextLine().trim());
+            } catch (NumberFormatException e) {
+                System.out.println("Invalid issue");
             }
         }
     }
@@ -63,14 +63,14 @@ public class Validation {
                     return input;
                 }
             } catch (Exception e) {
-                System.out.println("This field cannot be empty!");
+                System.out.println(error);
             }
         }
     }
 
-    public static boolean getMemberStatus() {
+    public static boolean getValidBoolean(String promt, String error) {
         while (true) {
-            System.out.println("Is this customer a registered member?");
+            System.out.println(promt);
             System.out.print("[Y/N]:");
             String input = sc.nextLine();
             try {
@@ -79,14 +79,14 @@ public class Validation {
                 }
                 return false;
             } catch (Exception e) {
-                System.out.println("A customer must either be a member or not!");
+                System.out.println(error);
             }
         }
     }
 
     public static LocalDate getValidDate(String promt, String error) {
         while (true) {
-            System.out.print("promt");
+            System.out.print(promt);
             String input = sc.nextLine().trim();
             try {
 
@@ -96,7 +96,8 @@ public class Validation {
                     System.out.println("This date hasn't happened yet");
                     continue;
                 }
-            } catch (Exception e) {
+                    return  parsedDate;
+            } catch (DateTimeParseException e) {
                 System.out.printf(error);
             }
         }
@@ -106,35 +107,29 @@ public class Validation {
         while (true) {
             System.out.print("[Mail]:");
             String input = sc.nextLine();
-            try {
-                if (emailValidate(input) != false) {
-                    return input;
-                }
-            } catch (Exception e) {
-                if (input.isEmpty()) {
-                    System.out.println("This field cannot be empty!");
-                } else {
-                    System.out.println("Invalid mail!");
-                }
+            if (emailValidate(input)) {
+                return input;
+            }
+            if (input.isEmpty()) {
+                System.out.println("This field cannot be empty!");
+            } else {
+                System.out.println("Invalid mail!");
             }
         }
     }
     
     public static String getValidPhone(){
-        while (true){
+            while (true) {
             System.out.print("[Phone Number]:");
-            String input = sc.nextLine();
-            try {
-                if(input.length()<=10){
-                    return input;
-                }
-            } catch (Exception e) {
-                if(input.isEmpty()){
-                    System.out.println("this field cannot be empty");
-                } else {
-                    System.out.println("invalid format");
-                }
+            String input = sc.nextLine().trim();
+            if (input.isEmpty()) {
+                System.out.println("This field cannot be empty");
+                continue;
             }
+            if (input.length() <= 10 && input.chars().allMatch(Character::isDigit)) {
+                return input;
+            }
+            System.out.println("Invalid format - digits only, 10 characters max");
         }
     }
  
@@ -151,6 +146,12 @@ public class Validation {
             System.out.println("Error: Book ID does not exist in inventory.");
             return false;
         }
+        
+        // check if book is available or is it disabled
+        if (!BookManager.isBookAvailable(bookId)) {
+    System.out.println("Error: This book is currently suspended from circulation and cannot be borrowed or waitlisted.");
+    return false;
+}
 
         // prevention for booking the same book from same customer
         for (Reservations res : reservationMap.values()) {
