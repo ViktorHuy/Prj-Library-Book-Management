@@ -6,7 +6,13 @@
             <file>file:/C:/Users/Huy/Documents/PRO192/Project/ses%206%20interface/prjLibraryManage/src/Model/data/BookData.java</file>
             <file>file:/C:/Users/Huy/Documents/PRO192/Project/ses%206%20interface/prjLibraryManage/src/Model/customer/Customer.java</file>
             <file>file:/C:/Users/Huy/Documents/PRO192/Project/ses%206%20interface/prjLibraryManage/src/Controller/BookManager.java</file>
+            <file>file:/C:/Users/Huy/Documents/PRO192/Project/ses%206%20interface/prjLibraryManage/src/Model/Overdues.java</file>
             <file>file:/C:/Users/Huy/Documents/PRO192/Project/ses%206%20interface/prjLibraryManage/src/Controller/CustomerManager.java</file>
+            <file>file:/C:/Users/Huy/Documents/PRO192/Project/ses%206%20interface/prjLibraryManage/src/Controller/OverdueManager.java</file>
+            <file>file:/C:/Users/Huy/Documents/PRO192/Project/ses%206%20interface/prjLibraryManage/src/Model/Reservations.java</file>
+            <file>file:/C:/Users/Huy/Documents/PRO192/Project/ses%206%20interface/prjLibraryManage/src/Controller/ReportManager.java</file>
+            <file>file:/C:/Users/Huy/Documents/PRO192/Project/ses%206%20interface/prjLibraryManage/src/Controller/ReservationManager.java</file>
+            <file>file:/C:/Users/Huy/Documents/PRO192/Project/ses%206%20interface/prjLibraryManage/src/Utils/Validation.java</file>
         </group>
     </open-files>
 </project-private>
