@@ -9,7 +9,7 @@ public class BookView {
         boolean back = false;
         while (!back) {
             printMenu();
-            int choice = ConsoleIO.readMenuChoice("Select an option: ", 0, 6);
+            int choice = ConsoleIO.readMenuChoice("Select an option: ", 0, 7);
  
             switch (choice) {
                 case 1:
@@ -30,6 +30,9 @@ public class BookView {
                 case 6:
                     toggleAvailability();
                     break;
+                case 7:
+                    sortBooks();
+                    break;
                 case 0:
                     back = true;
                     break;
@@ -46,7 +49,17 @@ public class BookView {
         System.out.println("4. Update Book");
         System.out.println("5. Remove Book");
         System.out.println("6. Suspend / Restore Book Availability");
+        System.out.println("7. Sort Books by Title / Author / Publish Year");
         System.out.println("0. Back to Main Menu");
+    }
+
+    private static void sortBooks() {
+        System.out.println("\n--- SORT BOOKS ---");
+        System.out.println("1. Sort by Title");
+        System.out.println("2. Sort by Author");
+        System.out.println("3. Sort by Publish Year");
+        int sortOption = ConsoleIO.readMenuChoice("Choose sorting option: ", 1, 3);
+        BookManager.displayAllBooks(sortOption);
     }
  
     private static void searchBook() {

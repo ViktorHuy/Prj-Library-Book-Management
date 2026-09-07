@@ -2,7 +2,6 @@
 package View;
 import Utils.ConsoleIO;
 import Controller.OverdueManager;
-import Controller.CustomerManager;
 
 public class OverdueView {
     public static void showMenu() {

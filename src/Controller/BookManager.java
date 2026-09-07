@@ -73,14 +73,36 @@ public class BookManager {
     }
 
     public static void displayAllBooks() {
+        displayAllBooks(0);
+    }
+
+    public static void displayAllBooks(int sortOption) {
         Map<String, BookData> map = loadBooksToMap();
         if (map.isEmpty()) {
             System.out.println("\nNo books found in the library.");
             return;
         }
 
-        System.out.println("\n---- LIBRARY INVENTORY ----");
-        for (BookData b : map.values()) {
+        List<BookData> books = new ArrayList<>(map.values());
+        switch (sortOption) {
+            case 1:
+                books.sort(Comparator.comparing(BookData::getTitle, String.CASE_INSENSITIVE_ORDER));
+                System.out.println("\n---- LIBRARY INVENTORY (SORTED BY TITLE) ----");
+                break;
+            case 2:
+                books.sort(Comparator.comparing(BookData::getAuthor, String.CASE_INSENSITIVE_ORDER));
+                System.out.println("\n---- LIBRARY INVENTORY (SORTED BY AUTHOR) ----");
+                break;
+            case 3:
+                books.sort(Comparator.comparing(BookData::getPublishDate));
+                System.out.println("\n---- LIBRARY INVENTORY (SORTED BY PUBLISH YEAR) ----");
+                break;
+            default:
+                System.out.println("\n---- LIBRARY INVENTORY ----");
+                break;
+        }
+
+        for (BookData b : books) {
             System.out.printf("Title: %s\n", b.getTitle());
             System.out.printf("ID: %s\n", b.getId());
             System.out.printf("Author: %s\n", b.getAuthor());
