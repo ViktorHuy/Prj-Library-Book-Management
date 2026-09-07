@@ -77,22 +77,22 @@ public class ReservationManager {
         //  check if ANYONE currently has this book borrowed
         boolean isCurrentlyBorrowed = false;
         for (Reservations res : map.values()) {
-            if (res.getBookId().toString().equals(bookId) && res.getStatus().equals("BORROWED")) {
+            if (res.getBookId().toString().equals(bookId) && res.getStatus().equalsIgnoreCase(Reservations.STATUS_BORROWED)) {
                 isCurrentlyBorrowed = true;
                 break;
             }
         }
-
+ 
         String initialStatus;
         if (isCurrentlyBorrowed != false) {
-            initialStatus = "waiting";
+            initialStatus = Reservations.STATUS_WAITING;
         } else {
-            initialStatus = "borrowed";
+            initialStatus = Reservations.STATUS_BORROWED;
         }
         Reservations newRes = new Reservations(UUID.fromString(customerId), UUID.fromString(bookId), initialStatus);
         map.put(newRes.getReserveId().toString(), newRes);
         saveMapToFile(map);
-
+ 
         if (isCurrentlyBorrowed) {
             System.out.printf("Book has already been borrowed!\nMoved to waitlist\n");
         } else {
@@ -107,9 +107,9 @@ public class ReservationManager {
  
         // find the person who currently have the book and mark the borrow status as COMPLETED and enter a buffer period
         for (Reservations res : map.values()) {
-            if (res.getBookId().toString().equals(bookId) && res.getStatus().equals("BORROWED")) {
+            if (res.getBookId().toString().equals(bookId) && res.getStatus().equalsIgnoreCase(Reservations.STATUS_BORROWED)) {
  
-                res.setStatus("COMPLETED");
+                res.setStatus(Reservations.STATUS_COMPLETED);
                 res.setReturnDate(LocalDate.now());
                 System.out.println("Success: Book successfully returned.");
                 System.out.println("Notice: Book is in the 2-day processing buffer before queue promotion.");
@@ -137,6 +137,8 @@ public class ReservationManager {
         System.out.println("Error: No active 'BORROWED' record found for this Book ID.");
     }
     }
+    
+    
     // passing the book to the next person in wait list if book is retunred and buffer days are over
     public static void processWaitlistQueue() {
     Map<String, Reservations> map = loadReservationsToMap();
@@ -156,9 +158,8 @@ public class ReservationManager {
         // Scan the history of this specific book
         for (Reservations res : map.values()) {
             if (!res.getBookId().toString().equals(bookId)) continue;
- 
-            if (res.getStatus().equals("BORROWED")) isBorrowed = true;
-            if (res.getStatus().equals("WAITING")) hasWaitlist = true;
+            if (res.getStatus().equalsIgnoreCase(Reservations.STATUS_BORROWED)) isBorrowed = true;
+            if (res.getStatus().equalsIgnoreCase(Reservations.STATUS_WAITING)) hasWaitlist = true;
             
             // Find the most recent date it was returned or voided
             if ((res.getStatus().equals("COMPLETED") || res.getStatus().equals("VOIDED")) 
@@ -233,7 +234,32 @@ public class ReservationManager {
     public static void viewWaitlistQueue(String bookId) {
         if (!BookManager.bookExists(bookId)) {
             System.out.println("Error: Book ID does not exist in the system.");
+            return;
         }
+ 
+        Map<String, Reservations> map = loadReservationsToMap();
+        Queue<Reservations> waitlist = buildWaitlistQueue(map, bookId);
+        String bookTitle = BookManager.getBookTitle(bookId);
+ 
+        System.out.println("\n=================================================");
+        System.out.println("   WAITLIST QUEUE FOR: " + bookTitle);
+        System.out.println("=================================================");
+ 
+        if (waitlist.isEmpty()) {
+            System.out.println("No one is currently waiting for this book.");
+        } else {
+            int position = 1;
+            for (Reservations res : waitlist) {
+                String customerName = CustomerManager.getCustomerName(res.getCustomerId().toString());
+                boolean isMember = CustomerManager.isCustomerMember(res.getCustomerId().toString());
+                String tag = isMember ? "[MEMBER - priority]" : "[non-member]";
+                System.out.printf("%d. %-10s %s | Requested: %s%n", position, customerName, tag, res.getBorrowDate());
+                position++;
+            }
+            System.out.println("-------------------------------------------------");
+            System.out.println("Total waiting: " + waitlist.size());
+        }
+        System.out.println("=================================================\n");
     }
     
     // select a book id to look it reservation history up, will how how many people borrowed 
@@ -254,17 +280,17 @@ public class ReservationManager {
         System.out.printf("   RESERVATION HISTORY FOR: %s", bookTitle);
         System.out.printf("\n=================================================\n");
  
-        for (Reservations res : map.values()) {
+       for (Reservations res : map.values()) {
  
             if (res.getBookId().toString().equals(bookId)) {
  
                 totalRequests++;
-                if (res.getStatus().equals("WAITING")) {
+                if (res.getStatus().equalsIgnoreCase(Reservations.STATUS_WAITING)) {
                     currentlyWaiting++;
                 }
  
                 String customerName = CustomerManager.getCustomerName(res.getCustomerId().toString());
-                System.out.printf("Date: %s | Status: %-10s | Customer: %s%n",res.getBorrowDate(), res.getStatus(), customerName);
+                System.out.printf("Date: %s | Status: %-10s | Customer: %s%n", res.getBorrowDate(), res.getStatus(), customerName);
             }
         }
  
@@ -272,12 +298,32 @@ public class ReservationManager {
             System.out.println("This book has never been reserved.");
         } else {
             System.out.println("-------------------------------------------------");
-            System.out.printf("Total lifetime requests: %d" , totalRequests);
-            System.out.printf("Customers currently in waitlist: %d", currentlyWaiting);
+            System.out.printf("Total lifetime requests: %d\n" , totalRequests);
+            System.out.printf("Customers currently in waitlist: %d\n", currentlyWaiting);
         }
         System.out.println("=================================================");
     }
  
+    // show all reservation ids
+    public static void viewAllReservations() {
+        Map<String, Reservations> map = loadReservationsToMap();
+ 
+        System.out.println("\n=================================================");
+        System.out.println("   ALL RESERVATIONS (ID REFERENCE)");
+        System.out.println("=================================================");
+ 
+        if (map.isEmpty()) {
+            System.out.println("No reservations found in the system.");
+        } else {
+            for (Reservations res : map.values()) {
+                String bookTitle = BookManager.getBookTitle(res.getBookId().toString());
+                String customerName = CustomerManager.getCustomerName(res.getCustomerId().toString());
+                System.out.printf("Reservation ID: %s | Status: %-10s | Book: %-20s | Customer: %-20s | Date: %s%n",res.getReserveId(), res.getStatus(), bookTitle, customerName, res.getBorrowDate());
+            }
+        }
+        System.out.println("=================================================\n");
+    }
+    
     // a function to calculate and display the statistic of how often the book is borrow
     // and how often the book is avaiable vs borrowed
     public static void bookAvailabilityStats(String bookId) {
@@ -301,14 +347,14 @@ public class ReservationManager {
                 }
  
                 // tally completed returns
-                if (res.getStatus().equals("COMPLETED")) {
+                if (res.getStatus().equalsIgnoreCase(Reservations.STATUS_COMPLETED)) {
                     timesBorrowed++;
                     LocalDate end = (res.getReturnDate() != null) ? res.getReturnDate() : res.getBorrowDate();
                     totalDaysBorrowed += ChronoUnit.DAYS.between(res.getBorrowDate(), end);
                 }
  
                 // tally currently borrowed book
-                if (res.getStatus().equals("BORROWED")) {
+                if (res.getStatus().equalsIgnoreCase(Reservations.STATUS_BORROWED)) {
                     timesBorrowed++;
                     totalDaysBorrowed += ChronoUnit.DAYS.between(res.getBorrowDate(), LocalDate.now());
                 }
@@ -334,12 +380,12 @@ public class ReservationManager {
  
         // display
         String title = BookManager.getBookTitle(bookId);
-        System.out.println("\n=================================================");
+        System.out.printf("\n=================================================\n");
         System.out.println("          STATISTICS FOR: " + title);
         System.out.println("=================================================");
         System.out.println("Total Times Borrowed : " + timesBorrowed);
-        System.out.println("Days in Circulation  : " + totalDaysBorrowed + " days");
-        System.out.println("Days Idle on Shelf   : " + daysFree + " days");
+        System.out.println("Days in Circulation  : " + totalDaysBorrowed + " day(s)");
+        System.out.println("Days Idle on Shelf   : " + daysFree + " day(s)");
         System.out.printf("Circulation Rate     : %.1f%% Borrowed | %.1f%% Free%n", percentBorrowed, percentFree);
         System.out.println("=================================================\n");
     }
@@ -351,11 +397,9 @@ public class ReservationManager {
  
         for (Reservations res : map.values()) {
             // find the exact active waitlist record
-            if (res.getCustomerId().toString().equals(customerId)
-                    && res.getBookId().toString().equals(bookId)
-                    && res.getStatus().equals("WAITING")) {
+            if (res.getCustomerId().toString().equals(customerId) && res.getBookId().toString().equals(bookId) && res.getStatus().equalsIgnoreCase(Reservations.STATUS_WAITING)) {
  
-                res.setStatus("CANCELLED");
+                res.setStatus(Reservations.STATUS_CANCELLED);
                 res.setReturnDate(LocalDate.now()); // record the time it was cancelled
  
                 found = true;
@@ -395,7 +439,7 @@ public class ReservationManager {
             // Look for customer who current have WAITING status for this specific book
             if (res.getBookId().toString().equals(bookId) && res.getStatus().equals("WAITING")) {
  
-                res.setStatus("CANCELLED");
+                res.setStatus(Reservations.STATUS_CANCELLED);
                 res.setReturnDate(LocalDate.now());
  
                 String customerName = CustomerManager.getCustomerName(res.getCustomerId().toString());
@@ -427,13 +471,13 @@ public class ReservationManager {
  
         String oldStatus = res.getStatus();
  
-        if (oldStatus.equals("VOIDED") || oldStatus.equals("COMPLETED")) {
+        if (oldStatus.equals(Reservations.STATUS_VOIDED) || oldStatus.equals(Reservations.STATUS_COMPLETED)) {
             System.out.println("Error: Only active (BORROWED or WAITING) reservations can be voided.");
             return;
         }
  
         // mark the reservation as voided and record when it was voided
-        res.setStatus("VOIDED");
+        res.setStatus(Reservations.STATUS_VOIDED);
         res.setReturnDate(LocalDate.now());
         System.out.printf("\nReservation with the id of %s has successfully been voided\n",reservationId);
         System.out.println("Reason logged: " + reason);
@@ -453,9 +497,9 @@ public class ReservationManager {
         Reservations winner = waitlist.poll();
  
         if (winner != null) {
-            winner.setStatus("BORROWED");
+            winner.setStatus(Reservations.STATUS_BORROWED);
             winner.setReturnDate(null);
-            System.out.println("Waitlist has been bumped up - next in line is now BORROWED.");
+            System.out.printf("\nWaitlist has been bumped up!\nNext in line is now BORROWED.");
         }
     }
     
@@ -463,7 +507,7 @@ public class ReservationManager {
     Map<String, Reservations> map = loadReservationsToMap();
     Reservations res = map.get(reservationId);
  
-    if (res == null || !res.getStatus().equals("COMPLETED")) {
+    if (res == null || !res.getStatus().equalsIgnoreCase(Reservations.STATUS_COMPLETED)) {
         System.out.println("Error: Invalid ID or reservation is not COMPLETED.");
         return;
     }
@@ -472,14 +516,14 @@ public class ReservationManager {
  
     // Check if the 2-day buffer already expired and the system gave it away
     for (Reservations checkRes : map.values()) {
-        if (checkRes.getBookId().toString().equals(bookId) && checkRes.getStatus().equals("BORROWED")) {
+        if (checkRes.getBookId().toString().equals(bookId) && checkRes.getStatus().equalsIgnoreCase(Reservations.STATUS_BORROWED)) {
             System.out.println("The 2-day buffer expired and this book was already passed to the next person.");
             return; 
         }
     }
  
     // Still within the buffer! Revert safely.
-    res.setStatus("BORROWED");
+    res.setStatus(Reservations.STATUS_BORROWED);
     res.setReturnDate(null); // Erases the accidental return date
     saveMapToFile(map);
     

@@ -116,21 +116,22 @@ public class BookData {
     // Convert Text Line -> Object
     public static BookData fromTxtLine(String line) {
         String[] parts = line.split("\\|");
-        
-        // new available status to enable/disable a book from being reserve
-        boolean availableStatus = true; 
-        if (parts.length >= 4) {
-            availableStatus = Boolean.parseBoolean(parts[3]); 
-        }
-        
+ 
         UUID loadedId = UUID.fromString(parts[0]);
         String title = parts[1];
         String author = parts[2];
         String genre = parts[3];
-        String category = parts[4];
-        Double price = Double.parseDouble(parts[5]);   
-        LocalDate publishDate = LocalDate.parse(parts[6]);
-
-        return new BookData(loadedId, title, author, genre, category, price, publishDate,availableStatus);
+        LocalDate publishDate = LocalDate.parse(parts[4]);
+        Double price = Double.parseDouble(parts[5]);
+        String category = parts[6];
+ 
+        // isAvailable is the last field written by toTxtLine() (index 7).
+        // Default to true only if an older/short line is somehow missing it.
+        boolean availableStatus = true;
+        if (parts.length >= 8) {
+            availableStatus = Boolean.parseBoolean(parts[7]);
+        }
+ 
+        return new BookData(loadedId, title, author, genre, category, price, publishDate, availableStatus);
     }
 }

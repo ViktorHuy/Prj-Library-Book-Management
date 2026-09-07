@@ -25,8 +25,14 @@ public class BookManager {
                 if (line.trim().isEmpty()) {
                     continue;
                 }
-                BookData book = BookData.fromTxtLine(line);
-                bookMap.put(book.getId().toString(), book);
+                try {
+                    BookData book = BookData.fromTxtLine(line);
+                    bookMap.put(book.getId().toString(), book);
+                } catch (Exception e) {
+                    // skip a row if it is unreadable or corrupted
+                    System.err.println("Skipping unreadable book record: " + line);
+                    System.err.println("  Reason: " + e.getMessage());
+                }
             }
         } catch (IOException e) {
             System.err.println("Error reading books.txt: " + e.getMessage());
@@ -49,13 +55,13 @@ public class BookManager {
     }
 
     // CRUD functions
-        public static void bookInput() {
-        String title = Validation.getValidString("[title]:", "Title cannot be blank!");
-        String author = Validation.getValidString("[Author]:", "Author field cannot be blank!");
-        String category = Validation.getValidString("[Category]:", "field cannot be empty");
-        String genre = Validation.getValidString("[Genre/Subject]:", "Field cannot be blank!");
+    public static void bookInput() {
+        String title = Validation.getValidString("[title]:", "Title cannot be blank!\n");
+        String author = Validation.getValidString("[Author]:", "Author field cannot be blank!\n");
+        String category = Validation.getValidString("[Category]:", "field cannot be empty\n");
+        String genre = Validation.getValidString("[Genre/Subject]:", "Field cannot be blank!\n");
         Double price = Validation.getValidPrice();
-        LocalDate pubDate = Validation.getValidDate("[Publish Date]:", "Please ensure the input is strictly [DD-MM-YYYY]");
+        LocalDate pubDate = Validation.getValidDate("[Publish Date]:", "Please ensure the input is strictly [DD-MM-YYYY]\n");
 
         BookData newBook = new BookData(title, author, genre, category, price, pubDate);
 
@@ -73,9 +79,33 @@ public class BookManager {
             return;
         }
 
-        System.out.println("\n--- LIBRARY INVENTORY ---");
+        System.out.println("\n---- LIBRARY INVENTORY ----");
         for (BookData b : map.values()) {
-            System.out.println(b);
+            System.out.printf("Title: %s\n", b.getTitle());
+            System.out.printf("ID: %s\n", b.getId());
+            System.out.printf("Author: %s\n", b.getAuthor());
+            System.out.printf("Cateogry: %s\n", b.getCategory());
+            System.out.printf("Genre: %s\n", b.getGenre());
+            System.out.printf("Price: %s$\n", b.getPrice());
+            System.out.printf("Publish Date: %s%n\n", b.getPublishDate());
+            System.out.println("------------------------");
+        }
+    }
+
+    // show a partial information so the user can choose a book id
+    public static void displayPartialBook() {
+        Map<String, BookData> map = loadBooksToMap();
+        if (map.isEmpty()) {
+            System.out.println("\nNo books found in the library.");
+            return;
+        }
+
+        System.out.println("\n---- LIBRARY INVENTORY ----");
+        for (BookData b : map.values()) {
+            System.out.printf("Title: %s\n", b.getTitle());
+            System.out.printf("ID: %s\n", b.getId());
+            System.out.printf("Author: %s\n", b.getAuthor());
+            System.out.println("------------------------");
         }
     }
 
@@ -86,7 +116,15 @@ public class BookManager {
         System.out.println("\n--- SEARCH RESULTS ---");
         for (BookData b : map.values()) {
             if (b.getTitle().toLowerCase().contains(keyword.toLowerCase())) {
-                System.out.println(b);
+                System.out.printf("Title: %s\n", b.getTitle());
+                System.out.printf("ID: %s\n", b.getId());
+                System.out.printf("Author: %s\n", b.getAuthor());
+                System.out.printf("Cateogry: %s\n", b.getCategory());
+                System.out.printf("Genre: %s\n", b.getGenre());
+                System.out.printf("Price: %s$\n", b.getPrice());
+                System.out.printf("Publish Date: %s%n\n", b.getPublishDate());
+                System.out.println("------------------------");
+
                 found = true;
             }
         }
@@ -154,6 +192,7 @@ public class BookManager {
         return (book != null) ? book.getTitle() : "Unknown Book (Deleted)";
     }
 
+    // switch the availability of the book
     public static void toggleBookAvailability(String bookId, boolean makeAvailable, String reason) {
         Map<String, BookData> map = loadBooksToMap();
         BookData book = map.get(bookId);
@@ -176,7 +215,7 @@ public class BookManager {
         System.out.printf("Success: '%s' has been marked as %s.%n", book.getTitle(), status);
         if (!makeAvailable) {
             System.out.println("Reason logged: " + reason);
-            System.out.println("Tip: Remember to run ReservationManager.clearBookQueue() if customers are waiting!");
+            System.out.println("Tip: Remember to clear the queue of the book incase there customers are waiting!");
         }
     }
 

@@ -36,7 +36,7 @@ public class ReportManager {
                     if (date.getYear() == year && date.getMonthValue() == month) {
                         totalBorrows++;
 
-                        if ("COMPLETED".equals(res.getStatus())) {
+                        if (Reservations.STATUS_COMPLETED.equalsIgnoreCase(res.getStatus())) {
                             completedReturns++;
                         }
 

@@ -55,16 +55,19 @@ public class BookView {
     }
  
     private static void updateBook() {
+        BookManager.displayPartialBook();
         String id = ConsoleIO.readLine("Enter Book ID to update: ");
         BookManager.updateBook(id);
     }
  
     private static void removeBook() {
+        BookManager.displayPartialBook();
         String id = ConsoleIO.readLine("Enter Book ID to remove: ");
         BookManager.removeBook(id);
     }
  
     private static void toggleAvailability() {
+        BookManager.displayPartialBook();
         String id = ConsoleIO.readLine("Enter Book ID: ");
         String action = ConsoleIO.readLine("Type 'suspend' or 'restore': ").toLowerCase();
  
