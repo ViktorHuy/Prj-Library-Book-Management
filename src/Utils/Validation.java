@@ -1,6 +1,4 @@
 package Utils;
-
-import java.util.InputMismatchException;
 import java.util.Scanner;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
@@ -134,41 +132,41 @@ public class Validation {
     }
  
     public static boolean isValidRequest(String customerId, String bookId, Map<String, Reservations> reservationMap) {
-        
+ 
         // check if the customer ID exists in CustomerManager
         if (!CustomerManager.customerExists(customerId)) {
             System.out.println("Error: Customer ID does not exist in system.");
             return false;
         }
-
+ 
         // check if the book ID exists in BookManager
         if (!BookManager.bookExists(bookId)) {
             System.out.println("Error: Book ID does not exist in inventory.");
             return false;
         }
-        
+ 
         // check if book is available or is it disabled
         if (!BookManager.isBookAvailable(bookId)) {
-    System.out.println("Error: This book is currently suspended from circulation and cannot be borrowed or waitlisted.");
-    return false;
-}
-
+            System.out.println("Error: This book is currently suspended from circulation and cannot be borrowed or waitlisted.");
+            return false;
+        }
+ 
         // prevention for booking the same book from same customer
         for (Reservations res : reservationMap.values()) {
-            if (res.getBookId().toString().equals(bookId) && 
+            if (res.getBookId().toString().equals(bookId) &&
                 res.getCustomerId().toString().equals(customerId)) {
-
-                if ("BORROWED".equals(res.getStatus())) {
+ 
+                if (Reservations.STATUS_BORROWED.equalsIgnoreCase(res.getStatus())) {
                     System.out.println("Error: Customer currently holds a borrowed copy of this book.");
                     return false;
                 }
-                if ("WAITING".equals(res.getStatus())) {
+                if (Reservations.STATUS_WAITING.equalsIgnoreCase(res.getStatus())) {
                     System.out.println("Error: Customer is already on the waitlist for this book.");
                     return false;
                 }
             }
         }
-
+ 
         return true; // All validation checks passed!
     }
 }

@@ -1,9 +1,10 @@
-
 package Model;
+
 import java.util.UUID;
 import java.time.LocalDate;
 
 public class Overdues {
+
     private UUID overdueId;
     private UUID customerId;
     private UUID reserveId;
@@ -12,12 +13,15 @@ public class Overdues {
     private LocalDate finedDate;
     private LocalDate payDate;
 
+    public static final String STATUS_PAID = "PAID";
+    public static final String STATUS_UNPAID = "UNPAID";
+
     // Constructor for new fines
     public Overdues(UUID customerId, UUID reserveId, int daysOverdue, double overdueInterest) {
         this.overdueId = UUID.randomUUID();
         this.customerId = customerId;
         this.reserveId = reserveId;
-        this.fine = daysOverdue*overdueInterest;
+        this.fine = daysOverdue * overdueInterest;
         this.status = "Unpaid";
         this.finedDate = LocalDate.now();
         this.payDate = null;
@@ -33,12 +37,12 @@ public class Overdues {
         this.finedDate = finedDate;
         this.payDate = payDate;
     }
-    
+
     // Translating from and to text files
     public String toTxtLine() {
         String paidStr = (payDate != null) ? payDate.toString() : "null";
-        return overdueId + "|" + customerId + "|" + reserveId + "|" + 
-               fine + "|" + status + "|" + finedDate + "|" + paidStr;
+        return overdueId + "|" + customerId + "|" + reserveId + "|"
+                + fine + "|" + status + "|" + finedDate + "|" + paidStr;
     }
 
     public static Overdues fromTxtLine(String line) {
@@ -46,8 +50,7 @@ public class Overdues {
         LocalDate parsedPaid = parts[6].equals("null") ? null : LocalDate.parse(parts[6]);
 
         return new Overdues(
-            UUID.fromString(parts[0]), UUID.fromString(parts[1]), UUID.fromString(parts[2]),
-            Double.parseDouble(parts[3]), parts[4], LocalDate.parse(parts[5]), parsedPaid
+                UUID.fromString(parts[0]), UUID.fromString(parts[1]), UUID.fromString(parts[2]),  Double.parseDouble(parts[3]), parts[4], LocalDate.parse(parts[5]), parsedPaid
         );
     }
 
@@ -106,7 +109,5 @@ public class Overdues {
     public void setPayDate(LocalDate payDate) {
         this.payDate = payDate;
     }
-    
-    
-    
+
 }

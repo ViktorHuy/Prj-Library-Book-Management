@@ -11,7 +11,7 @@ public class ReservationView {
         boolean back = false;
         while (!back) {
             printMenu();
-            int choice = ConsoleIO.readMenuChoice("Select an option: ", 0, 10);
+            int choice = ConsoleIO.readMenuChoice("Select an option: ", 0, 12);
  
             switch (choice) {
                 case 1:

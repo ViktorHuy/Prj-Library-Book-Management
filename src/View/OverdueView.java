@@ -9,7 +9,7 @@ public class OverdueView {
         boolean back = false;
         while (!back) {
             printMenu();
-            int choice = ConsoleIO.readMenuChoice("Select an option: ", 0, 3);
+            int choice = ConsoleIO.readMenuChoice("Select an option: ", 0, 5);
  
             switch (choice) {
                 case 1:
@@ -20,6 +20,12 @@ public class OverdueView {
                     break;
                 case 3:
                     viewFineArchive();
+                    break;
+                case 4:
+                    OverdueManager.viewAllActiveFines();
+                    break;
+                case 5:
+                    OverdueManager.viewAllFineArchive();
                     break;
                 case 0:
                     back = true;
