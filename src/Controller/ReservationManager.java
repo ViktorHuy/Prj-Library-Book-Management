@@ -233,7 +233,32 @@ public class ReservationManager {
     public static void viewWaitlistQueue(String bookId) {
         if (!BookManager.bookExists(bookId)) {
             System.out.println("Error: Book ID does not exist in the system.");
+            return;
         }
+ 
+        Map<String, Reservations> map = loadReservationsToMap();
+        Queue<Reservations> waitlist = buildWaitlistQueue(map, bookId);
+        String bookTitle = BookManager.getBookTitle(bookId);
+ 
+        System.out.println("\n=================================================");
+        System.out.println("   WAITLIST QUEUE FOR: " + bookTitle);
+        System.out.println("=================================================");
+ 
+        if (waitlist.isEmpty()) {
+            System.out.println("No one is currently waiting for this book.");
+        } else {
+            int position = 1;
+            for (Reservations res : waitlist) {
+                String customerName = CustomerManager.getCustomerName(res.getCustomerId().toString());
+                boolean isMember = CustomerManager.isCustomerMember(res.getCustomerId().toString());
+                String tag = isMember ? "[MEMBER - priority]" : "[non-member]";
+                System.out.printf("%d. %-25s %s | Requested: %s%n", position, customerName, tag, res.getBorrowDate());
+                position++;
+            }
+            System.out.println("-------------------------------------------------");
+            System.out.println("Total waiting: " + waitlist.size());
+        }
+        System.out.println("=================================================\n");
     }
     
     // select a book id to look it reservation history up, will how how many people borrowed 
@@ -272,12 +297,32 @@ public class ReservationManager {
             System.out.println("This book has never been reserved.");
         } else {
             System.out.println("-------------------------------------------------");
-            System.out.printf("Total lifetime requests: %d" , totalRequests);
-            System.out.printf("Customers currently in waitlist: %d", currentlyWaiting);
+            System.out.printf("Total lifetime requests: %d\n" , totalRequests);
+            System.out.printf("Customers currently in waitlist: %d\n", currentlyWaiting);
         }
         System.out.println("=================================================");
     }
  
+    // show all reservation ids
+    public static void viewAllReservations() {
+        Map<String, Reservations> map = loadReservationsToMap();
+ 
+        System.out.println("\n=================================================");
+        System.out.println("   ALL RESERVATIONS (ID REFERENCE)");
+        System.out.println("=================================================");
+ 
+        if (map.isEmpty()) {
+            System.out.println("No reservations found in the system.");
+        } else {
+            for (Reservations res : map.values()) {
+                String bookTitle = BookManager.getBookTitle(res.getBookId().toString());
+                String customerName = CustomerManager.getCustomerName(res.getCustomerId().toString());
+                System.out.printf("Reservation ID: %s | Status: %-10s | Book: %-20s | Customer: %-20s | Date: %s%n",res.getReserveId(), res.getStatus(), bookTitle, customerName, res.getBorrowDate());
+            }
+        }
+        System.out.println("=================================================\n");
+    }
+    
     // a function to calculate and display the statistic of how often the book is borrow
     // and how often the book is avaiable vs borrowed
     public static void bookAvailabilityStats(String bookId) {
@@ -334,12 +379,12 @@ public class ReservationManager {
  
         // display
         String title = BookManager.getBookTitle(bookId);
-        System.out.println("\n=================================================");
+        System.out.printf("\n=================================================\n");
         System.out.println("          STATISTICS FOR: " + title);
         System.out.println("=================================================");
         System.out.println("Total Times Borrowed : " + timesBorrowed);
-        System.out.println("Days in Circulation  : " + totalDaysBorrowed + " days");
-        System.out.println("Days Idle on Shelf   : " + daysFree + " days");
+        System.out.println("Days in Circulation  : " + totalDaysBorrowed + " day(s)");
+        System.out.println("Days Idle on Shelf   : " + daysFree + " day(s)");
         System.out.printf("Circulation Rate     : %.1f%% Borrowed | %.1f%% Free%n", percentBorrowed, percentFree);
         System.out.println("=================================================\n");
     }

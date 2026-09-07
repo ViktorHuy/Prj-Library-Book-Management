@@ -93,7 +93,7 @@ public class CustomerManager {
         for (Customer c : map.values()) {
             System.out.printf("Name: %s", c.getName());
             System.out.printf("\nID: %s", c.getId());
-            System.out.printf("\nPhone Number: %s", c.getPhoneNum());
+            System.out.printf("\nPhone Number: %s\n", c.getPhoneNum());
             System.out.printf("\n------------------------\n");
         }
 

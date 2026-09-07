@@ -63,17 +63,29 @@ public class OverdueManager {
         System.out.printf("Success! Fine of $%.2f has been paid and archived.%n", fine.getFine());
     }
     
+    //show active fines 
     public static void viewActiveFines(String customerId) {
         System.out.println("\n--- ACTIVE UNPAID FINES ---");
         displayFinesByStatus(customerId, "UNPAID");
     }
 
-    // 4. VIEW ARCHIVE (Paid Fines)
+    // archived fines(ones that are already paid)
     public static void viewFineArchive(String customerId) {
         System.out.println("\n--- PAID FINES ARCHIVE ---");
         displayFinesByStatus(customerId, "PAID");
     }
 
+    // methods that show all fines instead of just a selected user
+     public static void viewAllActiveFines() {
+        System.out.println("\n--- ALL ACTIVE UNPAID FINES (ALL CUSTOMERS) ---");
+        displayFinesByStatus(null, "UNPAID");
+    }
+ 
+    public static void viewAllFineArchive() {
+        System.out.println("\n--- ALL PAID FINES ARCHIVE (ALL CUSTOMERS) ---");
+        displayFinesByStatus(null, "PAID");
+    }
+    
     // Helper for printing
     private static void displayFinesByStatus(String customerId, String targetStatus) {
         Map<String, Overdues> map = loadFinesToMap();

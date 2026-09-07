@@ -1,1 +1,5 @@
-80d51aa7-4ad8-4533-bef7-973fcce612fb|Kill the mocking bird|Harper Lee|Thriller|1960-07-11|29.9|Novel|true
+80d51aa7-4ad8-4533-bef7-973fcce612fb|Kill the mocking bird|Harper Lee|Thriller|1960-07-11|29.9|Novel|false
+f9325326-0e55-41f8-9cbb-7b96ae7a3e8d|Into The Pit|Scott Cawthen|Horror|2019-12-26|24.99|Novel|true
+1b4f33c4-4ef9-4d7a-b333-461440f343b8|Harry Potter|J.K Rowling|Adventure|1997-06-26|13.99|Novel|true
+a4095fac-95fa-46a5-9f31-de6cfa353216|Book of the death|Natsuki Subaru|d e a t h|2000-03-12|0.99|i uh idk|true
+9e257ae7-873b-4408-9f67-0dccb75a0280|Bite of 87|Markieplier|the bite of |1987-08-03|87.0|WAS THAT|true
