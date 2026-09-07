@@ -8,12 +8,6 @@ public class OverdueManager {
     private static final Path FILE_PATH = Paths.get("fines.txt");
     private static final double DAILY_LATE_FEE =  25.00;
 
-    // TODO: move these onto Model.Overdues (mirroring Reservations.STATUS_*)
-    // once that file's available - kept here for now so typos still fail
-    // to compile instead of silently misbehaving.
-    private static final String STATUS_PAID = "PAID";
-    private static final String STATUS_UNPAID = "UNPAID";
-    
     // help read from files
     private static Map<String, Overdues> loadFinesToMap() {
         Map<String, Overdues> map = new LinkedHashMap<>();
@@ -50,12 +44,12 @@ public class OverdueManager {
             System.out.println("[Error]: Fine ID not found.");
             return;
         }
-        if (fine.getStatus().equalsIgnoreCase(STATUS_PAID)) {
+        if (fine.getStatus().equalsIgnoreCase(Overdues.STATUS_PAID)) {
             System.out.println("[Notice]: This fine has already been paid.");
             return;
         }
         
-        fine.setStatus(STATUS_PAID);
+        fine.setStatus(Overdues.STATUS_PAID);
         fine.setPayDate(LocalDate.now());
         saveMapToFile(map);
         System.out.printf("Success! Fine of $%.2f has been paid and archived.%n", fine.getFine());
@@ -63,29 +57,27 @@ public class OverdueManager {
     
     public static void viewActiveFines(String customerId) {
         System.out.println("\n--- ACTIVE UNPAID FINES ---");
-        displayFinesByStatus(customerId, STATUS_UNPAID);
+        displayFinesByStatus(customerId, Overdues.STATUS_UNPAID);
     }
     // 4. VIEW ARCHIVE (Paid Fines)
     public static void viewFineArchive(String customerId) {
         System.out.println("\n--- PAID FINES ARCHIVE ---");
-        displayFinesByStatus(customerId, STATUS_PAID);
+        displayFinesByStatus(customerId, Overdues.STATUS_PAID);
     }
 
-    // System-wide views - every customer, not just one. Handy for a
-    // librarian doing a "who currently owes money" pass without already
-    // having a list of customer IDs to check one by one.
+    // Show the entirety of the active fines for all customers
     public static void viewAllActiveFines() {
         System.out.println("\n--- ALL ACTIVE UNPAID FINES (ALL CUSTOMERS) ---");
-        displayFinesByStatus(null, STATUS_UNPAID);
+        displayFinesByStatus(null, Overdues.STATUS_UNPAID);
     }
 
+    // Show the entirety of the paid fines for all customers
     public static void viewAllFineArchive() {
         System.out.println("\n--- ALL PAID FINES ARCHIVE (ALL CUSTOMERS) ---");
-        displayFinesByStatus(null, STATUS_PAID);
+        displayFinesByStatus(null, Overdues.STATUS_PAID);
     }
 
-    // Helper for printing. customerId == null means "every customer" -
-    // used by the viewAll... methods above.
+    // Helper for printing. customerId == null means "every customer"
     private static void displayFinesByStatus(String customerId, String targetStatus) {
         Map<String, Overdues> map = loadFinesToMap();
         boolean found = false;
