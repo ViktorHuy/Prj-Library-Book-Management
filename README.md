@@ -1,8 +1,8 @@
 Work list
 
 Unfinished:
--A viewing view all ui for data that nice to look
--Automatically assign the book to next one in line (still have to do it manually)
+- viewing view all ui for data that nice to look
+- Automatically assign the book to next one in line (still have to do it manually)
 
 Finished:
 - CRUDS for book and member
@@ -14,3 +14,5 @@ Finished:
 - Generating reports for the month
 - Book priority
 - Borrowing statistic by members
+
+ps: lỡ xài 2 acc chắc ko sao đk 🐧
